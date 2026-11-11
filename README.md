@@ -43,7 +43,7 @@ Tạo mã bí mật bằng `node -e "console.log(require('node:crypto').randomBy
 ## Đăng nhập và quản trị
 
 - Khách phải tạo tài khoản hoặc đăng nhập để dùng thư viện, điểm danh, nạp thử và lưu tiến trình đọc.
-- Khu vực Trò chơi cho phép tài khoản chiến đấu để nhận 25 XP mỗi lượt; cứ đủ XP lên một cấp sẽ nhận đúng 1 coin. Tiến trình và phần thưởng được lưu, xác thực ở máy chủ.
+- Khu vực Trò chơi cho phép tài khoản chiến đấu để nhận 25 XP mỗi lượt; cứ đủ XP lên một cấp sẽ nhận đúng 1 coin. Có thể dùng 50 coin để tự động chiến đấu trong 5 phút. Tiến trình và phần thưởng được lưu, xác thực ở máy chủ.
 - Tài khoản được tạo với quyền độc giả. Email Admin không tự nhận quyền: tài khoản phải nhập đúng `ADMIN_SETUP_KEY`, và chỉ tài khoản đầu tiên được thiết lập.
 - Admin có thể đăng/ẩn truyện chữ, thêm tập, khóa/mở khóa tài khoản độc giả và chỉnh tên/dòng giới thiệu website.
 - Admin có thể thay nội dung tập mẫu hoặc sửa tập hiện có; giao diện đếm từ và máy chủ đều kiểm tra giới hạn 2.000–5.000 từ.

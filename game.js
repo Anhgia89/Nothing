@@ -14,6 +14,8 @@ const $ = (id) => document.getElementById(id);
 let user = null;
 let stories = [];
 let gameProgress = null;
+let gameAutoAttackTimeout = null;
+let gameAutoAttackInFlight = false;
 let siteConfig = { siteName: 'TruyenTruyenTV', siteTagline: 'Góc nhỏ của những câu chuyện lớn' };
 let activeCategory = 'Tất cả';
 let activeStory = null;
@@ -214,12 +216,18 @@ async function loadStories() {
 function renderGame() {
   if (!gameProgress) return;
   const progressPercent = Math.min(100, gameProgress.xp / gameProgress.nextLevelXp * 100);
+  const autoAttackRemaining = Math.max(0, gameProgress.autoAttackExpiresAt - Date.now());
   $('gameLevel').textContent = String(gameProgress.level);
   $('gameXp').textContent = `${gameProgress.xp} / ${gameProgress.nextLevelXp} XP`;
   $('gameProgress').setAttribute('aria-valuemax', String(gameProgress.nextLevelXp));
   $('gameProgress').setAttribute('aria-valuenow', String(gameProgress.xp));
   $('gameProgressFill').style.width = `${progressPercent}%`;
-  $('gameRewardHint').textContent = `Mỗi đòn đánh nhận ${gameProgress.xpPerAction} XP · Lên cấp nhận 1 xu`;
+  $('gameRewardHint').textContent =
+    `Mỗi đòn đánh nhận ${gameProgress.xpPerAction} XP · Lên cấp nhận 1 xu · Tự động 5 phút: ${gameProgress.autoAttackPrice} xu`;
+  $('gameAutoAttack').disabled = autoAttackRemaining > 0;
+  $('gameAutoAttack').textContent = autoAttackRemaining > 0
+    ? `Đang tự động · ${Math.ceil(autoAttackRemaining / 1000)} giây`
+    : `Tự động · ${gameProgress.autoAttackPrice} xu`;
 }
 
 async function loadGame() {
@@ -227,33 +235,93 @@ async function loadGame() {
     const result = await api('/api/game');
     gameProgress = result.game;
     renderGame();
+    scheduleAutoAttack();
   } catch (error) {
     showToast(error.message);
     console.error('Không thể tải tiến trình trò chơi:', error);
   }
 }
 
-async function playGame() {
+function scheduleAutoAttack(delay = 0) {
+  window.clearTimeout(gameAutoAttackTimeout);
+  if (!gameProgress || gameProgress.autoAttackExpiresAt <= Date.now()) {
+    renderGame();
+    return;
+  }
+  gameAutoAttackTimeout = window.setTimeout(runAutoAttack, Math.min(
+    delay || 100,
+    gameProgress.autoAttackExpiresAt - Date.now()
+  ));
+}
+
+async function performGameAttack(automatic = false) {
   const button = $('gameAction');
-  button.disabled = true;
-  $('gameStatus').textContent = 'Đang chiến đấu…';
+  if (!automatic) {
+    button.disabled = true;
+    $('gameStatus').textContent = 'Đang chiến đấu…';
+  }
   try {
-    const result = await api('/api/game/action', { method: 'POST', body: {} });
+    const result = await api('/api/game/action', { method: 'POST', body: { automatic } });
     gameProgress = result.game;
     user = result.user;
     renderGame();
     renderBalance();
-    $('gameStatus').textContent = result.levelsGained
+    if (!automatic || result.levelsGained) $('gameStatus').textContent = result.levelsGained
       ? `Lên cấp ${gameProgress.level}! Bạn nhận 1 xu ✦`
       : 'Đòn đánh thành công! +25 XP';
     if (result.levelsGained) renderAccount();
+    return true;
   } catch (error) {
-    $('gameStatus').textContent = error.message;
-    if (error.status !== 429) showToast(error.message);
-    else window.setTimeout(() => { button.disabled = false; }, 1000);
+    if (!automatic || error.status !== 429) $('gameStatus').textContent = error.message;
+    if (!automatic) showToast(error.message);
+    if (automatic && error.status !== 429) {
+      gameProgress.autoAttackExpiresAt = 0;
+      renderGame();
+      showToast(error.message);
+    }
+    return error.status === 429;
   } finally {
-    if (!$('gameStatus').textContent.startsWith('Bạn hãy chờ')) button.disabled = false;
+    if (!automatic) button.disabled = false;
   }
+}
+
+async function runAutoAttack() {
+  if (gameAutoAttackInFlight || !gameProgress || gameProgress.autoAttackExpiresAt <= Date.now()) {
+    renderGame();
+    return;
+  }
+  gameAutoAttackInFlight = true;
+  try {
+    const retry = await performGameAttack(true);
+    if (gameProgress.autoAttackExpiresAt > Date.now()) {
+      scheduleAutoAttack(retry ? 1100 : 1100);
+    }
+  } finally {
+    gameAutoAttackInFlight = false;
+  }
+}
+
+async function buyAutoAttack() {
+  const button = $('gameAutoAttack');
+  button.disabled = true;
+  try {
+    const result = await api('/api/game/auto-attack', { method: 'POST', body: {} });
+    gameProgress = result.game;
+    user = result.user;
+    renderGame();
+    renderBalance();
+    $('gameStatus').textContent = 'Đã kích hoạt tấn công tự động trong 5 phút.';
+    showToast('Đã dùng 50 xu để bật tự động chiến đấu trong 5 phút.');
+    renderAccount();
+    scheduleAutoAttack();
+  } catch (error) {
+    showToast(error.message);
+    button.disabled = false;
+  }
+}
+
+function playGame() {
+  performGameAttack();
 }
 
 function renderReadingHistory() {
@@ -899,6 +967,7 @@ $('authForm').addEventListener('submit', submitAuth);
 $('searchInput').addEventListener('input', renderStories);
 $('checkinButton').addEventListener('click', checkIn);
 $('gameAction').addEventListener('click', playGame);
+$('gameAutoAttack').addEventListener('click', buyAutoAttack);
 $('unlockEpisode').addEventListener('click', unlockEpisode);
 $('audioToggle').addEventListener('click', speakChapter);
 $('audioStop').addEventListener('click', stopAudio);

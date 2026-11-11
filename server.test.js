@@ -210,9 +210,19 @@ test('accounts, reading, coins and admin operations are persisted and protected'
   assert.equal(topup.data.user.coins, 28);
   const initialGame = await request('/api/game', { cookie: memberCookie });
   assert.deepEqual(initialGame.data.game, {
-    level: 1, xp: 0, nextLevelXp: 100, totalActions: 0, xpPerAction: 25
+    level: 1,
+    xp: 0,
+    nextLevelXp: 100,
+    totalActions: 0,
+    xpPerAction: 25,
+    autoAttackExpiresAt: 0,
+    autoAttackPrice: 50,
+    autoAttackDurationMs: 5 * 60 * 1000
   });
   assert.equal((await request('/api/game')).response.status, 401);
+  assert.equal((await request('/api/game/action', {
+    method: 'POST', body: { automatic: true }, cookie: memberCookie
+  })).response.status, 403);
   for (let action = 0; action < 4; action += 1) {
     await new Promise((resolve) => setTimeout(resolve, 1010));
     const attack = await request('/api/game/action', {
@@ -230,6 +240,34 @@ test('accounts, reading, coins and admin operations are persisted and protected'
   const gameAfterRefresh = await request('/api/game', { cookie: memberCookie });
   assert.equal(gameAfterRefresh.data.game.level, 2);
   assert.equal(gameAfterRefresh.data.game.totalActions, 4);
+  const autoAttackWithoutCoins = await request('/api/game/auto-attack', {
+    method: 'POST', body: {}, cookie: memberCookie
+  });
+  assert.equal(autoAttackWithoutCoins.response.status, 422);
+  const autoAttackTopup = await request('/api/coins/demo-topup', {
+    method: 'POST', cookie: memberCookie, body: { amount: 65 }
+  });
+  assert.equal(autoAttackTopup.data.user.coins, 94);
+  const autoAttackPurchase = await request('/api/game/auto-attack', {
+    method: 'POST', body: {}, cookie: memberCookie
+  });
+  assert.equal(autoAttackPurchase.response.status, 200);
+  assert.equal(autoAttackPurchase.data.user.coins, 44);
+  assert.equal(autoAttackPurchase.data.game.autoAttackPrice, 50);
+  assert.equal(autoAttackPurchase.data.game.autoAttackDurationMs, 5 * 60 * 1000);
+  assert.ok(autoAttackPurchase.data.game.autoAttackExpiresAt > Date.now());
+  await new Promise((resolve) => setTimeout(resolve, 1010));
+  const automaticAttack = await request('/api/game/action', {
+    method: 'POST', body: { automatic: true }, cookie: memberCookie
+  });
+  assert.equal(automaticAttack.response.status, 200);
+  const repeatedAutoAttackPurchase = await request('/api/game/auto-attack', {
+    method: 'POST', body: {}, cookie: memberCookie
+  });
+  assert.equal(repeatedAutoAttackPurchase.response.status, 422);
+  assert.equal((await request('/api/game/action', {
+    method: 'POST', body: { automatic: true }
+  })).response.status, 401);
   const previousEnvironment = process.env.NODE_ENV;
   process.env.NODE_ENV = 'production';
   const productionTopup = await request('/api/coins/demo-topup', {

@@ -12,6 +12,8 @@ const EPISODE_PRICE = 2;
 const DAILY_REWARD = 10;
 const GAME_ACTION_XP = 25;
 const GAME_ACTION_COOLDOWN_MS = 1000;
+const GAME_AUTO_ATTACK_PRICE = 50;
+const GAME_AUTO_ATTACK_DURATION_MS = 5 * 60 * 1000;
 const SESSION_DAYS = 30;
 const BODY_LIMIT = 1024 * 1024;
 const MIN_EPISODE_WORDS = 2000;
@@ -139,9 +141,14 @@ database.exec(`
     level INTEGER NOT NULL DEFAULT 1 CHECK (level >= 1),
     xp INTEGER NOT NULL DEFAULT 0 CHECK (xp >= 0),
     total_actions INTEGER NOT NULL DEFAULT 0 CHECK (total_actions >= 0),
-    last_action_at INTEGER NOT NULL DEFAULT 0
+    last_action_at INTEGER NOT NULL DEFAULT 0,
+    auto_attack_expires_at INTEGER NOT NULL DEFAULT 0
   );
 `);
+const gameProgressColumns = database.prepare('PRAGMA table_info(game_progress)').all();
+if (!gameProgressColumns.some((column) => column.name === 'auto_attack_expires_at')) {
+  database.exec('ALTER TABLE game_progress ADD COLUMN auto_attack_expires_at INTEGER NOT NULL DEFAULT 0');
+}
 
 database.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)').run('site_name', 'TruyenTruyenTV');
 database.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)').run(
@@ -369,7 +376,7 @@ function previousDate(dateKey) {
 
 function gamePayload(userId) {
   const progress = database.prepare(
-    'SELECT level, xp, total_actions FROM game_progress WHERE user_id = ?'
+    'SELECT level, xp, total_actions, auto_attack_expires_at FROM game_progress WHERE user_id = ?'
   ).get(userId);
   const nextLevelXp = progress.level * 100;
   return {
@@ -377,7 +384,10 @@ function gamePayload(userId) {
     xp: progress.xp,
     nextLevelXp,
     totalActions: progress.total_actions,
-    xpPerAction: GAME_ACTION_XP
+    xpPerAction: GAME_ACTION_XP,
+    autoAttackExpiresAt: progress.auto_attack_expires_at,
+    autoAttackPrice: GAME_AUTO_ATTACK_PRICE,
+    autoAttackDurationMs: GAME_AUTO_ATTACK_DURATION_MS
   };
 }
 
@@ -652,14 +662,46 @@ async function handleApi(request, response, requestUrl) {
     return json(response, 200, { game: gamePayload(user.id) });
   }
 
-  if (method === 'POST' && pathname === '/api/game/action') {
+  if (method === 'POST' && pathname === '/api/game/auto-attack') {
     const user = requireUser(request, response);
     if (!user) return;
     await readJson(request);
     const now = Date.now();
     const result = transaction(() => {
       database.prepare('INSERT OR IGNORE INTO game_progress (user_id) VALUES (?)').run(user.id);
+      const currentUser = statements.userById.get(user.id);
+      if (currentUser.coins < GAME_AUTO_ATTACK_PRICE) return false;
+
+      const progress = database.prepare(
+        'SELECT auto_attack_expires_at FROM game_progress WHERE user_id = ?'
+      ).get(user.id);
+      const expiresAt = Math.max(now, progress.auto_attack_expires_at) + GAME_AUTO_ATTACK_DURATION_MS;
+      database.prepare('UPDATE users SET coins = coins - ? WHERE id = ?')
+        .run(GAME_AUTO_ATTACK_PRICE, user.id);
+      database.prepare('UPDATE game_progress SET auto_attack_expires_at = ? WHERE user_id = ?')
+        .run(expiresAt, user.id);
+      database.prepare('INSERT INTO coin_transactions (id, user_id, amount, reason) VALUES (?, ?, ?, ?)')
+        .run(crypto.randomUUID(), user.id, -GAME_AUTO_ATTACK_PRICE, 'Kích hoạt tấn công tự động trong 5 phút');
+      return true;
+    });
+    if (!result) return json(response, 422, { error: 'Bạn cần có ít nhất 50 xu để kích hoạt tấn công tự động.' });
+    return json(response, 200, {
+      game: gamePayload(user.id),
+      user: mePayload(statements.userById.get(user.id))
+    });
+  }
+
+  if (method === 'POST' && pathname === '/api/game/action') {
+    const user = requireUser(request, response);
+    if (!user) return;
+    const body = await readJson(request);
+    const now = Date.now();
+    const result = transaction(() => {
+      database.prepare('INSERT OR IGNORE INTO game_progress (user_id) VALUES (?)').run(user.id);
       const progress = database.prepare('SELECT * FROM game_progress WHERE user_id = ?').get(user.id);
+      if (body.automatic === true && progress.auto_attack_expires_at <= now) {
+        return { autoAttackExpired: true };
+      }
       const cooldownRemaining = GAME_ACTION_COOLDOWN_MS - (now - progress.last_action_at);
       if (cooldownRemaining > 0) return { cooldownRemaining };
 
@@ -684,6 +726,9 @@ async function handleApi(request, response, requestUrl) {
       }
       return { levelsGained };
     });
+    if (result.autoAttackExpired) {
+      return json(response, 403, { error: 'Thời gian tấn công tự động đã hết.' });
+    }
     if (result.cooldownRemaining) {
       return json(response, 429, {
         error: 'Bạn hãy chờ một chút trước khi ra đòn tiếp theo.',
