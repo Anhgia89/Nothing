@@ -1,0 +1,8 @@
+.env
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+node_modules/
+# Local secrets written by `elevenlabs onboard`
+/.env.local

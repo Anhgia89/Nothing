@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11101a">
+  <title>TruyenTruyenTV — Chuyện hay, đọc mỗi ngày</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="TruyenTruyenTV trang chủ">
+      <span class="brand-mark">T<span>.</span></span>
+      <span class="brand-name">TruyenTruyenTV<small>CHUYỆN HAY MỖI NGÀY</small></span>
+    </a>
+    <nav class="main-nav" aria-label="Điều hướng chính">
+      <a class="nav-link active" href="#home">Khám phá</a>
+      <a class="nav-link" href="#stories">Kho truyện</a>
+      <a class="nav-link" href="#game">Trò chơi</a>
+      <a class="nav-link" href="#daily">Điểm danh</a>
+    </nav>
+    <div class="account-actions">
+      <div class="live-clock" aria-label="Thời gian thực"><span>◷</span><strong id="liveClock">--:--</strong></div>
+      <div class="coin-pill" aria-label="Số dư coin"><span>✦</span><strong id="coinBalance">0</strong><small>COIN</small></div>
+      <button class="topup-button" id="openTopup" type="button"><span>＋</span> Nạp coin</button>
+      <button class="admin-button" id="openAdmin" type="button" hidden>Quản trị</button>
+      <button class="avatar" id="profileButton" aria-label="Thông tin tài khoản" type="button">?</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-line"></span><span id="siteTagline">GÓC NHỎ CỦA NHỮNG CÂU CHUYỆN LỚN</span></div>
+        <h1>Mỗi trang sách,<br>một <em>thế giới</em> mới.</h1>
+        <p>Trốn vào một câu chuyện hay — nơi tiếng cười, bí ẩn và những rung động đang chờ bạn khám phá.</p>
+        <div class="hero-actions">
+          <a class="primary-button" href="#stories">Khám phá truyện <span>↗</span></a>
+          <div class="reader-note"><div class="reader-avatars">✦</div><span><b>Xem thử</b> tập đầu miễn phí</span></div>
+        </div>
+        <div class="hero-footnote"><span class="sparkle">✳</span> Truyện chữ · Cập nhật mỗi ngày · Đọc theo cách của bạn</div>
+      </div>
+      <div class="hero-art" aria-label="Minh họa sách và những câu chuyện">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+        <div class="floating-note note-top"><span>✧</span> câu chuyện mới</div>
+        <div class="book-stack">
+          <div class="book book-back"><span>NHỮNG NGÀY<br>THÁNG TƯ</span><small>MỘT CHÚT DỊU DÀNG</small></div>
+          <div class="book book-front"><span class="book-mark">✳</span><strong>SAU CÁNH<br>CỬA NỬA ĐÊM</strong><small>MỘT CHUYỆN KỂ CỦA TRUYENTRUYENTV</small><span class="book-stars">✦　✧　✦</span></div>
+          <div class="book-shadow"></div>
+        </div>
+        <div class="floating-note note-bottom"><span>✦</span> 100% truyện chữ</div>
+        <span class="art-spark art-spark-one">✦</span><span class="art-spark art-spark-two">✳</span>
+      </div>
+      <div class="hero-index"><span>01</span> / 04</div>
+    </section>
+
+    <section class="continue-strip" id="continueSection" hidden>
+      <div><span class="continue-icon">↗</span><div><strong>Đọc tiếp câu chuyện của bạn</strong><span id="continueDescription"></span></div></div>
+      <button class="checkin-button" id="continueButton" type="button">Đọc tiếp <span>→</span></button>
+    </section>
+
+    <section class="daily-strip" id="daily">
+      <div class="daily-icon">☀</div>
+      <div class="daily-copy"><strong>Ghé thăm mỗi ngày, nhận quà liền tay!</strong><span>Điểm danh hôm nay để nhận 10 coin đọc truyện.</span></div>
+      <div class="streak"><span>✦</span><b id="streakCount">0</b><small>NGÀY LIÊN TIẾP</small></div>
+      <button id="checkinButton" class="checkin-button" type="button">Điểm danh <span>→</span></button>
+    </section>
+
+    <section class="game-section" id="game">
+      <div class="game-heading">
+        <div>
+          <div class="eyebrow"><span class="eyebrow-line"></span> GÓC PHIÊU LƯU</div>
+          <h2>Rèn luyện, <em>nhận xu.</em></h2>
+          <p>Chiến đấu để tích lũy kinh nghiệm. Mỗi lần lên cấp, bạn nhận 1 xu vào tài khoản đọc truyện.</p>
+        </div>
+        <div class="game-level" aria-live="polite"><span>CẤP ĐỘ</span><strong id="gameLevel">1</strong></div>
+      </div>
+      <div class="game-card">
+        <div class="game-monster" aria-hidden="true">🐉</div>
+        <div class="game-progress">
+          <div class="game-progress-label"><strong id="gameStatus">Sẵn sàng phiêu lưu?</strong><span id="gameXp">0 / 100 XP</span></div>
+          <div class="game-progress-track" role="progressbar" aria-label="Kinh nghiệm lên cấp" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="gameProgress">
+            <span id="gameProgressFill"></span>
+          </div>
+          <small id="gameRewardHint">Thắng quái để nhận 25 XP mỗi lượt.</small>
+        </div>
+        <button class="primary-button game-action" id="gameAction" type="button">Tấn công <span>⚔</span></button>
+      </div>
+    </section>
+
+    <section class="stories-section" id="stories">
+      <div class="section-heading">
+        <div><div class="eyebrow"><span class="eyebrow-line"></span> TỦ SÁCH TRUYENTRUYENTV</div><h2>Chọn chuyện, <em>chọn mood.</em></h2></div>
+        <a class="text-link" href="#storyGrid">Xem tất cả <span>↗</span></a>
+      </div>
+      <div class="discover-tools">
+        <div class="filters" id="filters" aria-label="Lọc thể loại"></div>
+        <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="Tìm tên truyện, tác giả..." aria-label="Tìm kiếm truyện"><kbd>⌘ K</kbd></label>
+      </div>
+      <div class="story-grid" id="storyGrid"></div>
+    </section>
+
+    <section class="quote-banner">
+      <span class="quote-mark">“</span>
+      <p>Đôi khi, ta chỉ cần một câu chuyện để biết rằng<br><em>mình không cô đơn trong thế giới này.</em></p>
+      <span class="quote-credit">— MỘT NGƯỜI THÍCH ĐỌC</span>
+      <span class="quote-decoration">✳</span>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="brand footer-brand" href="#home"><span class="brand-mark">T<span>.</span></span><span class="brand-name">TruyenTruyenTV<small>CHUYỆN HAY MỖI NGÀY</small></span></a>
+    <span>Truyện mẫu là nội dung gốc; chỉ đăng truyện bên thứ ba khi có quyền sử dụng. © 2026 TruyenTruyenTV</span>
+    <span class="footer-note">Đọc một chút, vui cả ngày <b>✦</b></span>
+  </footer>
+
+  <dialog class="reader-dialog" id="readerDialog" aria-labelledby="readerTitle">
+    <button class="dialog-close" data-close="readerDialog" aria-label="Đóng" type="button">×</button>
+    <div class="reader-kicker" id="readerGenre"></div>
+    <h2 id="readerTitle"></h2>
+    <p class="reader-byline" id="readerByline"></p>
+    <div class="reader-divider"><span>✦</span></div>
+    <div class="episode-list" id="episodeList"></div>
+    <div class="audio-controls">
+      <label class="voice-label">Giọng đọc<select id="audioVoice"><option value="adam">Adam · Nam</option><option value="eva">Eva · Nữ</option></select></label>
+      <button class="audio-button" id="audioToggle" type="button"><span>▶</span> Nghe truyện</button>
+      <button class="audio-icon-button" id="audioStop" type="button" aria-label="Dừng đọc truyện">■</button>
+      <label>Tốc độ<select id="audioRate"><option value="0.85">0.85×</option><option value="1" selected>1×</option><option value="1.15">1.15×</option><option value="1.3">1.3×</option></select></label>
+      <span class="audio-note" id="audioStatus">Giọng AI tiếng Việt · ElevenLabs</span>
+    </div>
+    <audio class="generated-audio" id="audioPlayer" controls preload="none" hidden></audio>
+    <article class="chapter-content" id="chapterContent"></article>
+    <div class="reader-buy-row"><span id="episodePrice">Mỗi tập chỉ 2 coin</span><button id="unlockEpisode" class="primary-button" type="button">Mở khóa tập <span>✦</span></button></div>
+  </dialog>
+
+  <dialog class="auth-dialog" id="authDialog" aria-labelledby="authTitle">
+    <div class="modal-symbol">T.</div><div class="eyebrow">CHÀO MỪNG ĐẾN VỚI TRUYENTRUYENTV</div>
+    <h2 id="authTitle">Những câu chuyện đang chờ bạn.</h2>
+    <p class="modal-description" id="authDescription">Đăng nhập để lưu truyện đã đọc và đồng bộ tài khoản trên website.</p>
+    <div class="auth-tabs"><button class="auth-tab active" id="loginTab" type="button">Đăng nhập</button><button class="auth-tab" id="registerTab" type="button">Tạo tài khoản</button></div>
+    <form id="authForm" class="auth-form">
+      <label id="nameField" hidden>Tên hiển thị<input name="name" type="text" maxlength="50" autocomplete="name" placeholder="Tên bạn muốn dùng"></label>
+      <label>Email<input name="email" type="email" maxlength="254" autocomplete="email" required placeholder="ban@email.com"></label>
+      <label>Mật khẩu<input name="password" type="password" minlength="10" maxlength="128" autocomplete="current-password" required placeholder="Ít nhất 10 ký tự"></label>
+      <button class="primary-button auth-submit" id="authSubmit" type="submit">Đăng nhập <span>→</span></button>
+      <p class="auth-message" id="authMessage" role="status"></p>
+    </form>
+  </dialog>
+
+  <dialog class="account-dialog" id="accountDialog" aria-labelledby="accountTitle">
+    <button class="dialog-close" data-close="accountDialog" aria-label="Đóng" type="button">×</button>
+    <div class="modal-symbol account-symbol" id="accountAvatar">T</div><div class="eyebrow">TÀI KHOẢN CỦA BẠN</div>
+    <h2 id="accountTitle">Thư viện cá nhân</h2>
+    <p class="account-identity"><strong id="accountName"></strong><span id="accountEmail"></span></p>
+    <div class="reading-history"><strong>Lịch sử đọc gần đây</strong><div id="readingHistory"></div></div>
+    <form class="admin-setup" id="adminSetupForm" hidden>
+      <label>Mã kích hoạt Admin<input name="setupKey" type="password" autocomplete="off" required placeholder="Nhập mã ADMIN_SETUP_KEY trên máy chủ"></label>
+      <button class="quiet-button" type="submit">Kích hoạt quyền Admin</button>
+    </form>
+    <button class="quiet-button logout-button" id="logoutButton" type="button">Đăng xuất</button>
+  </dialog>
+
+  <dialog class="admin-dialog" id="adminDialog" aria-labelledby="adminTitle">
+    <button class="dialog-close" data-close="adminDialog" aria-label="Đóng" type="button">×</button>
+    <div class="eyebrow"><span class="eyebrow-line"></span> KHU VỰC ADMIN</div><h2 id="adminTitle">Quản trị website</h2>
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-admin-panel="stories" type="button">Truyện & tập</button>
+      <button class="admin-tab" data-admin-panel="users" type="button">Tài khoản</button>
+      <button class="admin-tab" data-admin-panel="settings" type="button">Website</button>
+    </div>
+    <section class="admin-panel active" id="adminStoriesPanel">
+      <div class="admin-panel-heading"><h3>Đăng truyện chữ mới</h3><span>Không dùng ảnh bìa</span></div>
+      <form class="admin-form" id="storyUploadForm">
+        <label>Tên truyện<input name="title" required maxlength="120"></label>
+        <label>Tác giả<input name="author" required maxlength="80"></label>
+        <label>Thể loại<select name="genre"><option>Hài hước</option><option>Kinh dị</option><option>Drama</option><option>Tình yêu</option><option>Hành động</option><option>18+</option></select></label>
+        <label class="wide-field">Mô tả<textarea name="description" rows="2" required maxlength="400"></textarea></label>
+        <label>Tên tập 1<input name="episodeTitle" required maxlength="120"></label>
+        <label>Đoạn giới thiệu tập<textarea name="preview" rows="3" required maxlength="2000"></textarea></label>
+        <label class="wide-field">Nội dung tập · 2.000–5.000 từ<textarea name="content" rows="7" required maxlength="100000"></textarea><span class="word-counter" data-word-counter="storyUploadForm">0 / 2.000–5.000 từ</span></label>
+        <button class="primary-button" type="submit">Đăng truyện <span>↑</span></button>
+      </form>
+      <div class="admin-panel-heading existing-stories-heading"><h3>Kho truyện</h3><button class="quiet-button" id="refreshStoriesButton" type="button">Làm mới</button></div>
+      <div class="admin-list" id="adminStoryList"></div>
+      <form class="admin-form append-form" id="episodeUploadForm" hidden>
+        <input type="hidden" name="storyId">
+        <div class="admin-panel-heading wide-field"><h3 id="episodeUploadTitle">Thêm tập truyện</h3><button class="quiet-button" id="cancelEpisodeButton" type="button">Đóng</button></div>
+        <label class="wide-field" id="episodeSelectField" hidden>Chọn tập cần sửa<select name="episodeNumber"></select></label>
+        <label class="wide-field">Tên tập<input name="title" required maxlength="120"></label>
+        <label class="wide-field">Đoạn giới thiệu<textarea name="preview" rows="3" required maxlength="2000"></textarea></label>
+        <label class="wide-field">Nội dung tập · 2.000–5.000 từ<textarea name="content" rows="7" required maxlength="100000"></textarea><span class="word-counter" data-word-counter="episodeUploadForm">0 / 2.000–5.000 từ</span></label>
+        <button class="primary-button" type="submit">Thêm tập <span>↑</span></button>
+      </form>
+    </section>
+    <section class="admin-panel" id="adminUsersPanel">
+      <div class="admin-panel-heading"><h3>Quản lý tài khoản</h3><button class="quiet-button" id="refreshUsersButton" type="button">Làm mới</button></div>
+      <div class="admin-list" id="adminUserList"></div>
+    </section>
+    <section class="admin-panel" id="adminSettingsPanel">
+      <h3>Cài đặt website</h3>
+      <form id="settingsForm" class="admin-form settings-form">
+        <label class="wide-field">Tên website<input name="siteName" maxlength="60" required></label>
+        <label class="wide-field">Dòng giới thiệu<input name="siteTagline" maxlength="160" required></label>
+        <button class="primary-button" type="submit">Lưu thay đổi <span>✓</span></button>
+      </form>
+    </section>
+  </dialog>
+
+  <dialog class="topup-dialog" id="topupDialog" aria-labelledby="topupTitle">
+    <button class="dialog-close" data-close="topupDialog" aria-label="Đóng" type="button">×</button>
+    <div class="modal-symbol">✦</div><div class="eyebrow">NẠP THÊM NĂNG LƯỢNG</div>
+    <h2 id="topupTitle">Thêm coin vào ví</h2>
+    <p class="modal-description">Chọn gói coin phù hợp để tiếp tục hành trình đọc của bạn.</p>
+    <div class="coin-packages" id="coinPackages"></div>
+    <p class="demo-note">Bản trải nghiệm: nạp coin chỉ mô phỏng, không phát sinh thanh toán thật.</p>
+  </dialog>
+
+  <dialog class="age-dialog" id="ageDialog" aria-labelledby="ageTitle">
+    <div class="modal-symbol age-symbol">18+</div><div class="eyebrow">NỘI DUNG DÀNH CHO NGƯỜI TRƯỞNG THÀNH</div>
+    <h2 id="ageTitle">Bạn đã đủ 18 tuổi?</h2>
+    <p class="modal-description">Thể loại này có chủ đề và tình tiết dành cho độc giả trưởng thành. Vui lòng xác nhận độ tuổi trước khi tiếp tục.</p>
+    <div class="age-actions"><button class="quiet-button" id="ageNo" type="button">Quay lại</button><button class="primary-button" id="ageYes" type="button">Tôi đã đủ 18 <span>→</span></button></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./game.js"></script>
+</body>
+</html>

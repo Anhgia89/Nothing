@@ -1,0 +1,27 @@
+{
+  "name": "truyentruyentv",
+  "version": "1.0.0",
+  "description": "TruyenTruyenTV — a Vietnamese text-story website with accounts and reading history.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:public": "node server.js",
+    "desktop": "electron .",
+    "check": "node --check server.js && node --check game.js && node --check main.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^45.0.0"
+  },
+  "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.75.0",
+    "dotenv": "^18.0.9"
+  }
+}
